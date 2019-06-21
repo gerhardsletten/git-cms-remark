@@ -1,0 +1,14 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "prettier",
+    "eslint:recommended"
+  ],
+  "rules": {
+    "space-before-function-paren": ["error", "never"]
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  }
+}
