@@ -5,13 +5,11 @@ module.exports = async function onCreateNode(
   {
     node,
     loadNodeContent,
-    actions,
-    createNodeId,
-    createContentDigest,
+    actions
   },
   pluginOptions
 ) {
-  const { createNode, createParentChildLink } = actions
+  const { updateNode } = actions
 
   // We only care about markdown content.
   if (
@@ -36,33 +34,16 @@ module.exports = async function onCreateNode(
     }
 
     let markdownNode = {
-      id: createNodeId(`${node.id} >>> MarkdownRemark`),
-      children: [],
-      parent: node.id,
-      internal: {
-        content: data.content,
-        type: `MarkdownRemark`,
+      frontmatter: {
+        title: ``,
+        ...data.data,
       },
+      excerpt: data.excerpt,
+      mdContent: data.content
     }
 
-    markdownNode.frontmatter = {
-      title: ``, // always include a title
-      ...data.data,
-    }
 
-    markdownNode.excerpt = data.excerpt
-    markdownNode.rawMarkdownBody = data.content
-
-    // Add path to the markdown file path
-    if (node.internal.type === `File`) {
-      markdownNode.fileAbsolutePath = node.absolutePath
-    }
-
-    markdownNode.internal.contentDigest = createContentDigest(markdownNode)
-
-    createNode(markdownNode)
-    createParentChildLink({ parent: node, child: markdownNode })
-
+    updateNode(node.id, markdownNode)
     return markdownNode
   } catch (err) {
     console.log(

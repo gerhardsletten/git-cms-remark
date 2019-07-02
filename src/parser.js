@@ -13,6 +13,12 @@ const NODES = []
 const createNode = (node) => {
   NODES.push(node)
 }
+const updateNode = (nodeId, node) => {
+  const found = NODES.find(({id}) => id === nodeId)
+  Object.keys(node).forEach((k) => {
+    found[k] = node[k]
+  })
+}
 const createParentChildLink = ({ parent, child }) => {
   const parentNode = NODES.find(({id}) => id === parent.id)
   parentNode.children.push(child.id)
@@ -46,6 +52,7 @@ exports.parser = async(options = {}) => {
         loadNodeContent,
         actions: {
           createNode,
+          updateNode,
           createParentChildLink
         },
         createNodeId,

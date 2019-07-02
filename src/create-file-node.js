@@ -49,8 +49,7 @@ exports.createFileNode = async(
     })
     internal = {
       contentDigest,
-      type: 'Directory',
-      // description: `Directory "${path.relative(process.cwd(), slashed)}"`,
+      type: 'Directory'
     }
   } else {
     const contentDigest = await md5File(slashedFile.absolutePath)
@@ -58,8 +57,7 @@ exports.createFileNode = async(
     internal = {
       contentDigest,
       type: 'File',
-      mediaType: mediaType ? mediaType : 'application/octet-stream',
-      // description: `File "${path.relative(process.cwd(), slashed)}"`,
+      mediaType: mediaType ? mediaType : 'application/octet-stream'
     }
   }
 
@@ -67,8 +65,6 @@ exports.createFileNode = async(
   return JSON.parse(
     JSON.stringify({
       id: createNodeId(pathToFile),
-      children: [],
-      parent: null,
       internal,
       absolutePath: slashedFile.absolutePath,
       relativePath: slash(
@@ -79,13 +75,8 @@ exports.createFileNode = async(
       ),
       extension: slashedFile.ext.slice(1).toLowerCase(),
       size: stats.size,
-      prettySize: prettyBytes(stats.size),
-      // modifiedTime: stats.mtime,
-      // accessTime: stats.atime,
       changeTime: stats.ctime,
-      birthTime: stats.birthtime,
-      //...slashedFile,
-      //...stats,
+      birthTime: stats.birthtime
     })
   )
 }

@@ -2,8 +2,10 @@
   "parser": "babel-eslint",
   "extends": [
     "prettier",
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:jest/recommended"
   ],
+  "plugins": ["jest"],
   "rules": {
     "space-before-function-paren": ["error", "never"]
   },
