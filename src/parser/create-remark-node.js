@@ -1,5 +1,8 @@
 const grayMatter = require(`gray-matter`)
+const Remark = require(`remark`)
 const _ = require(`lodash`)
+const toHAST = require(`mdast-util-to-hast`)
+const hastToHTML = require(`hast-util-to-html`)
 
 module.exports = async function onCreateNode(
   {
@@ -7,7 +10,7 @@ module.exports = async function onCreateNode(
     loadNodeContent,
     actions
   },
-  pluginOptions
+  options = {}
 ) {
   const { updateNode } = actions
 
@@ -22,7 +25,7 @@ module.exports = async function onCreateNode(
   const content = await loadNodeContent(node)
 
   try {
-    let data = grayMatter(content, pluginOptions)
+    let data = grayMatter(content, options)
 
     if (data.data) {
       data.data = _.mapValues(data.data, value => {
@@ -33,13 +36,23 @@ module.exports = async function onCreateNode(
       })
     }
 
+    const remarkOptions = {
+      commonmark: true,
+      footnotes: true,
+      gfm: true,
+      ...options
+    }
+
+    const remark = new Remark().data(`settings`, remarkOptions)
+    const markdownAST = remark.parse(data.content)
+    const hastOptions = {allowDangerousHTML: true}
     let markdownNode = {
       frontmatter: {
         title: ``,
         ...data.data,
       },
-      excerpt: data.excerpt,
-      mdContent: data.content
+      content: hastToHTML(toHAST(markdownAST, hastOptions), hastOptions),
+      rawContent: data.content
     }
 
 

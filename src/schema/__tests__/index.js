@@ -1,9 +1,12 @@
 const { graphql } = require(`graphql`)
-const createShema = require('..')
+const {createSchema} = require('..')
 
 const pages = [{
   id: '1',
   slug: '/',
+  updated: '2019-07-03T17:56:47.613Z',
+  created: '2019-06-17T12:32:37.365Z',
+  rawContent: 'About content',
   content: 'Homepage content',
   parentId: null,
   frontmatter: {
@@ -16,6 +19,9 @@ const pages = [{
 }, {
   id: '2',
   slug: '/about',
+  updated: '2019-07-03T17:56:47.613Z',
+  created: '2019-06-17T12:32:37.365Z',
+  rawContent: 'About content',
   content: 'About content',
   parentId: '1',
   frontmatter: {
@@ -28,6 +34,9 @@ const pages = [{
 }, {
   id: '3',
   slug: '/contact',
+  updated: '2019-07-03T17:56:47.613Z',
+  created: '2019-06-17T12:32:37.365Z',
+  rawContent: 'About content',
   content: 'Contact content',
   parentId: '1',
   frontmatter: {
@@ -40,7 +49,7 @@ const pages = [{
 }]
 
 describe(`Graphql api for pages`, () => {
-  const schema = createShema({pages})
+  const schema = createSchema({pages})
   const runQuery = query => graphql(schema, query)
 
   it(`Query frontpage`, async() => {

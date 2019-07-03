@@ -2,10 +2,12 @@ const { schemaComposer } = require('graphql-compose');
 const {composeWithJson} = require('graphql-compose-json');
 const arraySort = require('array-sort')
 const getValue = require('get-value')
+const fs = require(`fs-extra`)
 const {
   getNamedType,
   isSpecifiedScalarType,
 } = require(`graphql`)
+const {defaults, buildConfig, readConfigFile} = require('../config')
 
 const isBuiltInScalarType = type => isSpecifiedScalarType(type)
 const sortMethods = ['ASC', 'DESC']
@@ -34,6 +36,13 @@ const FILTER_FN = {
 const DEVIDER_OBJECT = '_'
 const DEVIDER_METHOD = '__'
 
+function createSchemaFromConfig(confFile) {
+  const opts = readConfigFile(confFile)
+  const options = buildConfig({...defaults,...opts})
+  const pages = fs.readJsonSync(options.outputFilename)
+  return createSchema({pages})
+}
+
 function createSchema({pages = []}) {
   const allFrontmatterFields = pages.reduce((obj, item) => {
     const fields = item[FRONTMATTER_KEY]
@@ -55,6 +64,9 @@ function createSchema({pages = []}) {
       id: 'ID!',
       slug: 'String!',
       content: 'String',
+      rawContent: 'String',
+      updated: 'String',
+      created: 'String',
       parentId: 'ID'
     },
   });
@@ -104,8 +116,6 @@ function createSchema({pages = []}) {
   }
   extractSortFields(PageTC)
   extractSortFields(FrontmatterTC, FRONTMATTER_KEY)
-
-  // console.log('PagesWhereInputITC', PagesWhereInputITC.getFieldNames())
 
   // Resolvers
 
@@ -206,4 +216,7 @@ function createSchema({pages = []}) {
   return schemaComposer.buildSchema()
 }
 
-module.exports = createSchema
+module.exports = {
+  createSchema,
+  createSchemaFromConfig
+}

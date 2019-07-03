@@ -1,10 +1,10 @@
 const chokidar = require('chokidar')
-const fs = require(`fs`)
-const path = require(`path`)
+const fs = require(`fs-extra`)
 const { createFileNode, createContentDigest } = require(`./create-file-node`)
 const createRemarkNode = require(`./create-remark-node`)
 const uuidv5 = require(`uuid/v5`)
 const _ = require(`lodash`)
+const {defaults, buildConfig} = require('../config')
 
 const createNodeId = (path) => uuidv5(path, uuidv5.URL)
 
@@ -29,7 +29,7 @@ const loadNodeContent = async(node) => {
     return node.internal.content
   } else {
     return new Promise((resolve, reject) => {
-      fs.readFile(node.absolutePath, `utf-8`, (err, content) => {
+      fs.readFile(node.internal.absolutePath, `utf-8`, (err, content) => {
         if (err) {
           return reject(err)
         }
@@ -39,7 +39,27 @@ const loadNodeContent = async(node) => {
   }
 }
 
-exports.parser = async(options = {}) => {
+function transformNodes({internal, ...node}) {
+  const {relativePath} = internal
+  const slug = `/${relativePath}`.replace('/index.md', '').replace('.md', '')
+  return {
+    ...node,
+    parentId: null,
+    slug
+  }
+}
+
+const parseAndWriteMarkdown = async(opts = {}) => {
+  const options = buildConfig({...defaults,...opts})
+  const allPages = await parseMarkdownFiles(options)
+  const mdPages = allPages.filter(({internal: {extension}}) => extension === 'md').map(transformNodes)
+  await fs.ensureDir(options.outputDir)
+  await fs.writeJson(options.outputFilename, mdPages)
+  return mdPages
+}
+
+const parseMarkdownFiles = async(opts = {}) => {
+  const options = buildConfig({...defaults,...opts})
   const createAndProcessNode = path => {
     const fileNodePromise = createFileNode(
       path,
@@ -61,11 +81,8 @@ exports.parser = async(options = {}) => {
     })
     return fileNodePromise
   }
-  if (!fs.existsSync(options.path)) {
+  if (!fs.existsSync(options.markdownDir)) {
     throw new Error('Path not found')
-  }
-  if (!path.isAbsolute(options.path)) {
-    options.path = path.resolve(process.cwd(), options.path)
   }
   let pathQueue = []
   const flushPathQueue = () => {
@@ -73,7 +90,7 @@ exports.parser = async(options = {}) => {
     pathQueue = []
     return Promise.all(queue.map(createAndProcessNode))
   }
-  const watcher = chokidar.watch(options.path, {
+  const watcher = chokidar.watch(options.markdownDir, {
     ignored: [
       `**/*.un~`,
       `**/.DS_Store`,
@@ -100,4 +117,8 @@ exports.parser = async(options = {}) => {
       }, reject)
     })
   })
+}
+module.exports = {
+  parseAndWriteMarkdown,
+  parseMarkdownFiles
 }

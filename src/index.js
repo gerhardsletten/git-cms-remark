@@ -1,5 +1,6 @@
-const createShema = require('./schema');
+const {createSchema, createSchemaFromConfig} = require('./schema');
 
 module.exports = {
-  createShema
+  createSchema,
+  createSchemaFromConfig
 }

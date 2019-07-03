@@ -1,12 +1,16 @@
 {
-  "name": "git-cms-remark",
-  "version": "1.0.1",
-  "description": "Git based cms that serve md-files",
+  "name": "graphql-cms",
+  "version": "1.0.0",
+  "description": "Headless CMS serving markdown/remark content through a graphql-service",
   "main": "src/index.js",
   "scripts": {
     "format": "prettier --write \"*.js\"",
     "lint": "eslint -c .eslintrc src",
+    "coverage": "jest --coverage",
     "test": "jest"
+  },
+  "bin": {
+    "graphql-cms": "src/bin.js"
   },
   "author": "Eyvind Gerhard Sletten <gerhardsletten@gmail.com> (http://www.metabits.no/)",
   "license": "ISC",
@@ -14,14 +18,17 @@
     "array-sort": "^1.0.0",
     "bluebird": "^3.5.5",
     "chokidar": "^3.0.1",
+    "commander": "^2.20.0",
     "fs-extra": "^8.0.1",
     "get-value": "^3.0.1",
     "graphql": "^14.3.1",
     "graphql-compose": "^7.1.0",
     "graphql-compose-json": "^4.0.1",
     "gray-matter": "^4.0.2",
+    "hast-util-to-html": "^6.0.1",
     "lodash": "^4.17.11",
     "md5-file": "^4.0.0",
+    "mdast-util-to-hast": "^6.0.1",
     "mime": "^2.4.4",
     "pretty-bytes": "^5.2.0",
     "remark": "^10.0.1",

@@ -26,7 +26,7 @@ function slash(path) {
 exports.createFileNode = async(
   pathToFile,
   createNodeId,
-  pluginOptions = {}
+  options = {}
 ) => {
   const slashed = slash(pathToFile)
   const parsedSlashed = path.parse(slashed)
@@ -35,30 +35,32 @@ exports.createFileNode = async(
     absolutePath: slashed,
     // Useful for limiting graphql query with certain parent directory
     relativeDirectory: path.relative(
-      pluginOptions.path || process.cwd(),
+      options.markdownDir || process.cwd(),
       parsedSlashed.dir
     ),
   }
 
   const stats = await fs.stat(slashedFile.absolutePath)
-  let internal
+  const internal = {
+    absolutePath: slashedFile.absolutePath,
+    relativePath: slash(
+      path.relative(
+        options.markdownDir || process.cwd(),
+        slashedFile.absolutePath
+      )
+    ),
+    extension: slashedFile.ext.slice(1).toLowerCase(),
+    fileSize: stats.size,
+  }
   if (stats.isDirectory()) {
-    const contentDigest = createContentDigest({
+    internal.contentDigest = createContentDigest({
       stats: stats,
       absolutePath: slashedFile.absolutePath,
     })
-    internal = {
-      contentDigest,
-      type: 'Directory'
-    }
   } else {
-    const contentDigest = await md5File(slashedFile.absolutePath)
+    internal.contentDigest = await md5File(slashedFile.absolutePath)
     const mediaType = mime.getType(slashedFile.ext)
-    internal = {
-      contentDigest,
-      type: 'File',
-      mediaType: mediaType ? mediaType : 'application/octet-stream'
-    }
+    internal.mediaType = mediaType ? mediaType : 'application/octet-stream'
   }
 
   // Stringify date objects.
@@ -66,17 +68,8 @@ exports.createFileNode = async(
     JSON.stringify({
       id: createNodeId(pathToFile),
       internal,
-      absolutePath: slashedFile.absolutePath,
-      relativePath: slash(
-        path.relative(
-          pluginOptions.path || process.cwd(),
-          slashedFile.absolutePath
-        )
-      ),
-      extension: slashedFile.ext.slice(1).toLowerCase(),
-      size: stats.size,
-      changeTime: stats.ctime,
-      birthTime: stats.birthtime
+      updated: stats.ctime,
+      created: stats.birthtime
     })
   )
 }
